@@ -1,9 +1,9 @@
 # Document Forensics Docker #
 
-Docker container for analysis of suspicous documents. 
+Docker container for analysis of suspicious documents. 
 
 1. Build & Run Docker Container
-1. Load suspicous file
+1. Load suspicious file
 1. Run forensic tools
 1. Kill container
 
@@ -34,7 +34,7 @@ Tested on Python 3.6
 	import time, tarfile, docker
 	client = docker.from_env()
 
-Prepare files stream
+Prepare file binary stream
 
 	tar_stream = io.BytesIO()
 	dest_archive_info = tarfile.TarInfo(name='container_dest_file_name.tar')
@@ -56,22 +56,30 @@ Run container & put file
 
 ### Analyze file with installed tools ###
 
-mraptor - mraptor is a tool designed to detect most malicious VBA Macros using generic heuristics. Unlike antivirus engines, it does not rely on signatures.
+### mraptor ###
+
+mraptor is a tool designed to detect most malicious VBA Macros using generic heuristics. Unlike antivirus engines, it does not rely on signatures.
 
 	print(container.exec_run(['mraptor','/home/malware/container_dest_file_name.tar',]).output.decode('utf-8'))
 
 
-olevba - olevba is a script to parse OLE and OpenXML files such as MS Office documents (e.g. Word, Excel), to detect VBA Macros, extract their source code in clear text, and detect security-related patterns such as auto-executable macros, suspicious VBA keywords used by malware, anti-sandboxing and anti-virtualization techniques, and potential IOCs (IP addresses, URLs, executable filenames, etc). It also detects and decodes several common obfuscation methods including Hex encoding, StrReverse, Base64, Dridex, VBA expressions, and extracts IOCs from decoded strings.
+### olevba ###
+
+olevba is a script to parse OLE and OpenXML files such as MS Office documents (e.g. Word, Excel), to detect VBA Macros, extract their source code in clear text, and detect security-related patterns such as auto-executable macros, suspicious VBA keywords used by malware, anti-sandboxing and anti-virtualization techniques, and potential IOCs (IP addresses, URLs, executable filenames, etc). It also detects and decodes several common obfuscation methods including Hex encoding, StrReverse, Base64, Dridex, VBA expressions, and extracts IOCs from decoded strings.
 
 	print(container.exec_run(['olevba','--decode','--reveal','/home/malware/container_dest_file_name.tar',]).output.decode('utf-8'))
 
 
-hachoir-subfile - hachoir-subfile is a tool based on hachoir-parser to find subfiles in any binary stream.
+### hachoir-subfile ### 
+
+hachoir-subfile is a tool based on hachoir-parser to find subfiles in any binary stream.
 
 	print(container.exec_run(['hachoir-subfile','/home/malware/container_dest_file_name.tar',]).output.decode('utf-8'))
 
 
-hachoir-metadata - hachoir-metadata extracts metadata from multimedia files: music, picture, video, but also archives. It supports most common file formats:
+### hachoir-metadata ###
+
+hachoir-metadata extracts metadata from multimedia files: music, picture, video, but also archives. It supports most common file formats:
 
 * Archives: bzip2, gzip, zip, tar
 * Audio: MPEG audio (“MP3”), WAV, Sun/NeXT audio, Ogg/Vorbis (OGG), MIDI, AIFF, AIFC, Real audio (RA)
@@ -83,17 +91,23 @@ hachoir-metadata - hachoir-metadata extracts metadata from multimedia files: mus
 	print(container.exec_run(['hachoir-metadata','/home/malware/container_dest_file_name.tar',]).output.decode('utf-8'))
 
 
-peepdf - peepdf is a Python tool to explore PDF files in order to find out if the file can be harmful or not. The aim of this tool is to provide all the necessary components that a security researcher could need in a PDF analysis without using 3 or 4 tools to make all the tasks. With peepdf it's possible to see all the objects in the document showing the suspicious elements, supports all the most used filters and encodings, it can parse different versions of a file, object streams and encrypted files. With the installation of PyV8 and Pylibemu it provides Javascript and shellcode analysis wrappers too. 
+### peepdf ###
+
+peepdf is a Python tool to explore PDF files in order to find out if the file can be harmful or not. The aim of this tool is to provide all the necessary components that a security researcher could need in a PDF analysis without using 3 or 4 tools to make all the tasks. With peepdf it's possible to see all the objects in the document showing the suspicious elements, supports all the most used filters and encodings, it can parse different versions of a file, object streams and encrypted files. With the installation of PyV8 and Pylibemu it provides Javascript and shellcode analysis wrappers too. 
 
 	print(container.exec_run(['peepdf','-f','/home/malware/container_dest_file_name.tar']).output.decode('utf-8'))
 
 
-pdfid - This tool will scan a file to look for certain PDF keywords, allowing you to identify PDF documents that contain (for example) JavaScript or execute an action when opened. PDFiD will also handle name obfuscation.
+### pdfid ###
+
+This tool will scan a file to look for certain PDF keywords, allowing you to identify PDF documents that contain (for example) JavaScript or execute an action when opened. PDFiD will also handle name obfuscation.
 
 	print(container.exec_run(['pdfid','/home/malware/container_dest_file_name.tar',]).output.decode('utf-8'))
 
 
-ghostscript - create image preview
+### ghostscript ###
+
+create image preview
 
 	print(container.exec_run(['ghostscript', '-dNOPAUSE', '-dBATCH', '-sDEVICE=pngalpha', '-r96',
 								'-sOutputFile=out1.png','/home/malware/container_dest_file_name.tar'
@@ -109,6 +123,6 @@ Example python script:
 	container.kill()
 
 
-### Priviledged Mode ###
+### Privileged Mode  ###
 
-If elevated priviledges are needed, run options '--security-opt="no-new-privileges" --cap-drop=all' and user changed to 'malware' are done for your own safety -- you're operating on untrusted code. If you remove them you will be able to use sudo (same password as user name).
+If elevated privileges are needed, run options '--security-opt="no-new-privileges" --cap-drop=all' and user changed to 'malware' are done for your own safety -- you're operating on untrusted code. If you remove them you will be able to use sudo (same password as user name).
