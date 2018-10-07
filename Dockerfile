@@ -1,5 +1,5 @@
 #
-# Docker container for analysis of suspicous documents with pre-installed forensic tools
+# Docker container for analysis of suspicious documents with pre-installed forensic tools
 #	Ready to be managed from python3 with official docker liblary
 #
 # Build:
